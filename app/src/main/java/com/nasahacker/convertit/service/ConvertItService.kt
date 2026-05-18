@@ -1,70 +1,108 @@
 package com.nasahacker.convertit.service
 
 /**
- * @author Tamim Hossain
- * @email tamimh.dev@gmail.com
- * @license Apache-2.0
+ * Convertit Android app
+ * <a href="https://github.com/thebytearray/Convertit">GitHub Repository</a>
  *
- * ConvertIt is a free and easy-to-use audio converter app.
- * It supports popular audio formats like MP3 and M4A.
- * With options for high-quality bitrates ranging from 128k to 320k,
- * ConvertIt offers a seamless conversion experience tailored to your needs.
+ * Created by Tamim Hossain.
+ * Copyright (c) 2025 The Byte Array LTD.
+ *
+ * This file is part of the Convertit Android app.
+ *
+ * The Convertit Android app is free software: you can redistribute it and/or
+ * modify it under the terms of the Apache License, Version 2.0 as published by
+ * the Apache Software Foundation.
+ *
+ * The Convertit Android app is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the Apache License for more
+ * details.
+ *
+ * You should have received a copy of the Apache License
+ * along with the Convertit Android app. If not, see <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a>.
+ *
+ * @author Tamim Hossain
+ * @company The Byte Array LTD
+ * @year 2025
+ * @license Apache-2.0
  */
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.content.pm.ServiceInfo
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.ServiceCompat
+import androidx.core.net.toUri
+import com.arthenica.ffmpegkit.FFmpegKit
 import com.nasahacker.convertit.R
-import com.nasahacker.convertit.dto.AudioBitrate
-import com.nasahacker.convertit.dto.AudioFormat
-import com.nasahacker.convertit.util.AppUtil
+import com.nasahacker.convertit.domain.model.AudioBitrate
+import com.nasahacker.convertit.domain.model.AudioFormat
+import com.nasahacker.convertit.domain.model.AudioSampleRate
+import com.nasahacker.convertit.domain.repository.AppRepository
+import com.nasahacker.convertit.domain.repository.AudioConverterRepository
+import com.nasahacker.convertit.util.AppConfig.ACTION_REQUEST_STATE
 import com.nasahacker.convertit.util.AppConfig.ACTION_STOP_SERVICE
 import com.nasahacker.convertit.util.AppConfig.AUDIO_FORMAT
 import com.nasahacker.convertit.util.AppConfig.AUDIO_PLAYBACK_SPEED
 import com.nasahacker.convertit.util.AppConfig.BITRATE
 import com.nasahacker.convertit.util.AppConfig.CHANNEL_ID
 import com.nasahacker.convertit.util.AppConfig.CONVERT_BROADCAST_ACTION
+import com.nasahacker.convertit.util.AppConfig.CONVERT_PROGRESS_ACTION
+import com.nasahacker.convertit.util.AppConfig.CONVERT_FILE_COMPLETE_ACTION
+import com.nasahacker.convertit.util.AppConfig.CONVERT_STATE_ACTION
+import com.nasahacker.convertit.util.AppConfig.CUE_URI
+import com.nasahacker.convertit.util.AppConfig.CURRENT_FILE_INDEX
+import com.nasahacker.convertit.util.AppConfig.FILE_PROGRESS
+import com.nasahacker.convertit.util.AppConfig.FILE_URI
 import com.nasahacker.convertit.util.AppConfig.IS_SUCCESS
+import com.nasahacker.convertit.util.AppConfig.PENDING_URIS
+import com.nasahacker.convertit.util.AppConfig.TARGET_FORMAT
+import com.nasahacker.convertit.util.AppConfig.TOTAL_FILES
 import com.nasahacker.convertit.util.AppConfig.URI_LIST
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import com.arthenica.ffmpegkit.FFmpegKit
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class ConvertItService : Service() {
     companion object {
         private const val TAG = "ConvertItService"
         var isForegroundServiceStarted = false
     }
 
+    @Inject
+    lateinit var userPrefRepository: AppRepository
+
+    @Inject
+    lateinit var audioConverterRepository: AudioConverterRepository
+
     private val notificationId = 1
     private var conversionJob: Job? = null
+    private var pendingUris: List<Uri> = emptyList()
+    private var currentTargetFormat: String = ""
+    private var currentFileIndex: Int = 0
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
         super.onDestroy()
         Log.i(TAG, "Service destroyed")
-        
-        // Cancel ongoing conversion job
+
         conversionJob?.cancel()
         conversionJob = null
-        
-        // Cancel all FFmpeg sessions
+        pendingUris = emptyList()
+
         FFmpegKit.cancel()
         Log.i(TAG, "Cancelled all FFmpeg sessions in onDestroy")
     }
@@ -81,45 +119,62 @@ class ConvertItService : Service() {
         startId: Int,
     ): Int {
         Log.i(
-            TAG, "onStartCommand: Received intent with action: ${intent?.action}, startId: $startId"
+            TAG,
+            "onStartCommand: Received intent with action: ${intent?.action}, startId: $startId",
         )
 
         if (intent?.action == ACTION_STOP_SERVICE) {
             Log.i(TAG, "Stopping service as per user request. startId: $startId")
-            
-            // Cancel ongoing conversion job
+
             conversionJob?.cancel()
             conversionJob = null
-            
-            // Cancel all FFmpeg sessions
+            pendingUris = emptyList()
+
             FFmpegKit.cancel()
             Log.i(TAG, "Cancelled all FFmpeg sessions")
-            
+
             showCompletionNotification(success = false, cancelled = true)
             broadcastConversionResult(Intent().apply { action = CONVERT_BROADCAST_ACTION }, false)
             stopForegroundService()
             return START_NOT_STICKY
         }
-
-        val uriList: ArrayList<Uri>? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent?.getParcelableArrayListExtra(URI_LIST, Uri::class.java)
-        } else {
-            intent?.getParcelableArrayListExtra(URI_LIST)
+        
+        if (intent?.action == ACTION_REQUEST_STATE) {
+            Log.i(TAG, "State requested, broadcasting current state")
+            broadcastCurrentState()
+            return START_NOT_STICKY
         }
+
+        val uriList: ArrayList<Uri>? =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent?.getParcelableArrayListExtra(URI_LIST, Uri::class.java)
+            } else {
+                intent?.getParcelableArrayListExtra(URI_LIST)
+            }
 
         val bitrate = AudioBitrate.fromBitrate(intent?.getStringExtra(BITRATE))
         val format = AudioFormat.fromExtension(intent?.getStringExtra(AUDIO_FORMAT))
         val speed = intent?.getStringExtra(AUDIO_PLAYBACK_SPEED) ?: "1.0"
+        val sampleRateHz = intent?.getStringExtra(com.nasahacker.convertit.util.AppConfig.AUDIO_SAMPLE_RATE)
+        val sampleRate = AudioSampleRate.fromHz(sampleRateHz)
+        val cueUri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent?.getParcelableExtra(CUE_URI, Uri::class.java)
+        } else {
+            intent?.getParcelableExtra(CUE_URI)
+        }
 
         Log.d(
-            TAG, """
+            TAG,
+            """
             Conversion parameters:
             - Format: ${format.extension}
             - Bitrate: ${bitrate.bitrate}
             - Playback Speed: $speed
+            - Sample Rate: ${sampleRate.hz}
             - Number of files: ${uriList?.size ?: 0}
+            - CUE file: ${cueUri?.lastPathSegment ?: "None"}
             - Files: ${uriList?.joinToString { it.lastPathSegment ?: "unknown" }}
-        """.trimIndent()
+            """.trimIndent(),
         )
 
         if (uriList.isNullOrEmpty()) {
@@ -130,87 +185,287 @@ class ConvertItService : Service() {
             return START_NOT_STICKY
         }
 
-        conversionJob = CoroutineScope(Dispatchers.IO).launch {
-            try {
-                Log.i(TAG, "Starting audio conversion for ${uriList.size} files. startId: $startId")
-                AppUtil.convertAudio(
-                    context = this@ConvertItService,
-                    speed,
-                    uris = uriList,
-                    outputFormat = format,
-                    bitrate = bitrate,
-                    onSuccess = {
-                        Log.i(
-                            TAG,
-                            "Conversion completed successfully for all files. startId: $startId"
-                        )
-                        showCompletionNotification(true)
-                        broadcastConversionResult(Intent().apply {
-                            action = CONVERT_BROADCAST_ACTION
-                        }, true)
-                        stopForegroundService()
-                    },
-                    onFailure = { error ->
-                        Log.e(TAG, "Conversion failed with error: ${error}. startId: $startId")
-                        showCompletionNotification(false)
-                        broadcastConversionResult(Intent().apply {
-                            action = CONVERT_BROADCAST_ACTION
-                        }, false)
-                        stopForegroundService()
-                    },
-                    onProgress = { progress ->
-                        Log.v(TAG, "Conversion progress: $progress%. startId: $startId")
-                        updateNotification(progress)
-                    },
-                )
-            } catch (e: Exception) {
-                Log.e(TAG, "Unexpected error during conversion. startId: $startId", e)
-                showCompletionNotification(false)
-                broadcastConversionResult(
-                    Intent().apply { action = CONVERT_BROADCAST_ACTION }, false
-                )
-                stopForegroundService()
-            }
-        }
+        pendingUris = uriList.toList()
+        currentTargetFormat = format.extension
+        currentFileIndex = 0
+        
+        conversionJob?.cancel()
+        conversionJob = null
 
-        return START_STICKY
+        conversionJob =
+            CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+                try {
+                    Log.i(
+                        TAG,
+                        "Starting audio conversion for ${uriList.size} files. startId: $startId"
+                    )
+
+                    val customSaveLocation = userPrefRepository.selectedCustomLocation.firstOrNull().orEmpty()
+                    Log.d(TAG, "Raw custom save location from preferences: '$customSaveLocation'")
+                    
+                    val customSaveUri = if (customSaveLocation.isNotBlank()) {
+                        customSaveLocation.toUri().also { uri ->
+                            Log.d(TAG, "Converted to URI: $uri (scheme: ${uri.scheme}, path: ${uri.path})")
+                        }
+                    } else {
+                        Log.d(TAG, "Custom save location is empty, using null")
+                        null
+                    }
+                    
+                    if (cueUri != null && uriList.size == 1) {
+                        // CUE-based conversion
+                        val firstUri = uriList.firstOrNull()
+                        if (firstUri == null) {
+                            Log.e(TAG, "URI list became empty during CUE conversion. Aborting.")
+                            showCompletionNotification(false)
+                            broadcastConversionResult(Intent().apply { action = CONVERT_BROADCAST_ACTION }, false)
+                            stopForegroundService()
+                            return@launch
+                        }
+                        Log.i(TAG, "Starting CUE-based conversion with CUE file: ${cueUri.lastPathSegment}")
+                        // Broadcast file start for CUE conversion
+                        broadcastFileProgress(firstUri, 0f, 0, 1)
+                        audioConverterRepository.convertWithManualCue(
+                            customSaveUri = customSaveUri,
+                            playbackSpeed = speed,
+                            audioUri = firstUri,
+                            cueUri = cueUri,
+                            outputFormat = format,
+                            bitrate = bitrate,
+                            sampleRate = sampleRate,
+                            onSuccess = {
+                                Log.i(
+                                    TAG,
+                                    "CUE-based conversion completed successfully. startId: $startId",
+                                )
+                                broadcastFileComplete(firstUri, true)
+                                showCompletionNotification(true)
+                                broadcastConversionResult(
+                                    Intent().apply {
+                                        action = CONVERT_BROADCAST_ACTION
+                                    },
+                                    true,
+                                )
+                                stopForegroundService()
+                            },
+                            onFailure = { error ->
+                                Log.e(TAG, "CUE-based conversion failed with error: $error. startId: $startId")
+                                broadcastFileComplete(firstUri, false)
+                                showCompletionNotification(false)
+                                broadcastConversionResult(
+                                    Intent().apply {
+                                        action = CONVERT_BROADCAST_ACTION
+                                    },
+                                    false,
+                                )
+                                stopForegroundService()
+                            },
+                            onProgress = { progress ->
+                                Log.v(TAG, "CUE conversion progress: $progress%. startId: $startId")
+                                updateNotification(progress)
+                                broadcastFileProgress(firstUri, progress / 100f, 0, 1)
+                            },
+                        )
+                    } else {
+                        // Regular conversion
+                        Log.i(TAG, "Starting regular conversion for ${uriList.size} files")
+                        audioConverterRepository.performConversion(
+                            customSaveUri = customSaveUri,
+                            playbackSpeed = speed,
+                            uris = uriList,
+                            outputFormat = format,
+                            bitrate = bitrate,
+                            sampleRate = sampleRate,
+                            onSuccess = {
+                                Log.i(
+                                    TAG,
+                                    "Conversion completed successfully for all files. startId: $startId",
+                                )
+                                showCompletionNotification(true)
+                                broadcastConversionResult(
+                                    Intent().apply {
+                                        action = CONVERT_BROADCAST_ACTION
+                                    },
+                                    true,
+                                )
+                                stopForegroundService()
+                            },
+                            onFailure = { error ->
+                                Log.e(TAG, "Conversion failed with error: $error. startId: $startId")
+                                showCompletionNotification(false)
+                                broadcastConversionResult(
+                                    Intent().apply {
+                                        action = CONVERT_BROADCAST_ACTION
+                                    },
+                                    false,
+                                )
+                                stopForegroundService()
+                            },
+                            onProgress = { progress ->
+                                Log.v(TAG, "Conversion progress: $progress%. startId: $startId")
+                                updateNotification(progress)
+                            },
+                            onFileStart = { uri, index, total ->
+                                Log.i(TAG, "Starting file ${index + 1}/$total: ${uri.lastPathSegment}")
+                                currentFileIndex = index
+                                broadcastFileProgress(uri, 0f, index, total)
+                            },
+                            onFileProgress = { uri, progress ->
+                                broadcastFileProgress(uri, progress, currentFileIndex, pendingUris.size)
+                            },
+                            onFileComplete = { uri, success ->
+                                Log.i(TAG, "File completed: ${uri.lastPathSegment}, success: $success")
+                                pendingUris = pendingUris.filter { it != uri }
+                                broadcastFileComplete(uri, success)
+                            },
+                        )
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Exception during conversion: ${e.message}. startId: $startId")
+                    showCompletionNotification(false)
+                    broadcastConversionResult(
+                        Intent().apply {
+                            action = CONVERT_BROADCAST_ACTION
+                        },
+                        false,
+                    )
+                    stopForegroundService()
+                }
+            }
+
+        return START_NOT_STICKY
+    }
+
+    private fun startForegroundServiceWithNotification() {
+        val notification = createNotification("Preparing conversion...", 0)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(
+                notificationId,
+                notification,
+            )
+        } else {
+            startForeground(notificationId, notification)
+        }
+        isForegroundServiceStarted = true
+    }
+
+    private fun createNotification(
+        message: String,
+        progress: Int,
+    ): Notification {
+        val stopIntent =
+            Intent(this, ConvertItService::class.java).apply {
+                action = ACTION_STOP_SERVICE
+            }
+        val stopPendingIntent =
+            PendingIntent.getService(
+                this,
+                0,
+                stopIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+
+        val builder =
+            NotificationCompat
+                .Builder(this, CHANNEL_ID)
+                .setContentTitle("ConvertIt")
+                .setContentText(message)
+                .setSmallIcon(R.mipmap.ic_launcher_foreground)
+                .setOngoing(true)
+                .setProgress(100, progress, false)
+                .addAction(
+                    R.drawable.baseline_stop_24,
+                    "Stop",
+                    stopPendingIntent,
+                )
+
+        return builder.build()
+    }
+
+    private fun updateNotification(progress: Int) {
+        val message = "Converting audio... $progress%"
+        val notification = createNotification(message, progress)
+        NotificationManagerCompat.from(this).notify(notificationId, notification)
+    }
+
+    private fun showCompletionNotification(
+        success: Boolean,
+        cancelled: Boolean = false,
+    ) {
+        val message =
+            when {
+                cancelled -> "Conversion cancelled"
+                success -> "Conversion completed successfully"
+                else -> "Conversion failed"
+            }
+
+        val notification =
+            NotificationCompat
+                .Builder(this, CHANNEL_ID)
+                .setContentTitle("ConvertIt")
+                .setContentText(message)
+                .setSmallIcon(R.mipmap.ic_launcher_foreground)
+                .setOngoing(false)
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setVibrate(if (success) longArrayOf(0, 100, 100, 100) else null)
+                .build()
+
+        NotificationManagerCompat.from(this).notify(notificationId, notification)
     }
 
     private fun broadcastConversionResult(
         intent: Intent,
-        isSuccess: Boolean,
+        success: Boolean,
     ) {
-        intent.putExtra(IS_SUCCESS, isSuccess)
+        intent.putExtra(IS_SUCCESS, success)
+        intent.setPackage(packageName)
         sendBroadcast(intent)
-        Log.d(TAG, "Broadcast conversion result: $isSuccess")
     }
 
-    private fun startForegroundServiceWithNotification() {
-        val notification = createProgressNotification(0, true)
-        if (!isForegroundServiceStarted) {
-            ServiceCompat.startForeground(
-                /* service = */ this,
-                /* id = */ notificationId,
-                /* notification = */ notification,
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
-                } else {
-                    0
-                },
-            )
-            isForegroundServiceStarted = true
-            Log.i(TAG, "Started foreground service with notification ID: $notificationId")
-        } else {
-            Log.w(TAG, "Foreground service already started. Skipping start.")
+    private fun broadcastFileProgress(
+        uri: Uri,
+        progress: Float,
+        currentIndex: Int,
+        totalFiles: Int,
+    ) {
+        val intent = Intent(CONVERT_PROGRESS_ACTION).apply {
+            putExtra(FILE_URI, uri.toString())
+            putExtra(FILE_PROGRESS, progress)
+            putExtra(CURRENT_FILE_INDEX, currentIndex)
+            putExtra(TOTAL_FILES, totalFiles)
+            setPackage(packageName)
         }
+        sendBroadcast(intent)
     }
 
+    private fun broadcastFileComplete(
+        uri: Uri,
+        success: Boolean,
+    ) {
+        val intent = Intent(CONVERT_FILE_COMPLETE_ACTION).apply {
+            putExtra(FILE_URI, uri.toString())
+            putExtra(IS_SUCCESS, success)
+            setPackage(packageName)
+        }
+        sendBroadcast(intent)
+    }
+
+    private fun broadcastCurrentState() {
+        if (pendingUris.isEmpty()) return
+        val uriStrings = ArrayList(pendingUris.map { it.toString() })
+        val intent = Intent(CONVERT_STATE_ACTION).apply {
+            putStringArrayListExtra(PENDING_URIS, uriStrings)
+            putExtra(TARGET_FORMAT, currentTargetFormat)
+            putExtra(CURRENT_FILE_INDEX, currentFileIndex)
+            setPackage(packageName)
+        }
+        sendBroadcast(intent)
+        Log.i(TAG, "Broadcast current state: ${pendingUris.size} pending, index: $currentFileIndex")
+    }
+
+    @SuppressLint("Deprecated")
     private fun stopForegroundService() {
-        if (!isForegroundServiceStarted) {
-            Log.w(TAG, "Attempted to stop foreground service when it wasn't started")
-            return
-        }
-
         isForegroundServiceStarted = false
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             stopForeground(STOP_FOREGROUND_REMOVE)
@@ -218,91 +473,5 @@ class ConvertItService : Service() {
             stopForeground(true)
         }
         stopSelf()
-        Log.i(TAG, "Foreground service stopped and removed")
-    }
-
-    private fun createProgressNotification(
-        progress: Int,
-        isIndeterminate: Boolean,
-    ): Notification {
-        val stopIntent = Intent(this, ConvertItService::class.java).apply {
-            action = ACTION_STOP_SERVICE
-        }
-        val stopPendingIntent = PendingIntent.getService(
-            this,
-            0,
-            stopIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
-
-        val (title, contentText) = if (isIndeterminate) {
-            getString(R.string.converting_audio_files) to getString(R.string.label_converting_audio)
-        } else {
-            // Put percentage in title for better visibility on Android 15+
-            "${getString(R.string.converting_audio_files)} ($progress%)" to getString(R.string.label_conversion_progress, progress)
-        }
-
-        Log.d(
-            TAG, "Creating progress notification: $title - $contentText (Indeterminate: $isIndeterminate)"
-        )
-
-        return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(title)
-            .setContentText(contentText)
-            .setSmallIcon(R.mipmap.ic_launcher_foreground)
-            .setProgress(100, progress, isIndeterminate)
-            .setAutoCancel(false)
-            .setOngoing(true)
-            .setDefaults(0)
-            .setOnlyAlertOnce(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setCategory(NotificationCompat.CATEGORY_PROGRESS)
-            .addAction(R.drawable.baseline_stop_24, getString(R.string.label_stop), stopPendingIntent)
-            .build()
-    }
-
-    private fun updateNotification(progress: Int) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && ActivityCompat.checkSelfPermission(
-                this, Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            Log.w(
-                TAG, "Notification permission not granted. Skipping update for progress: $progress%"
-            )
-            return
-        }
-
-        val notification = createProgressNotification(progress, false)
-        NotificationManagerCompat.from(this).notify(notificationId, notification)
-        Log.v(TAG, "Updated notification: Progress $progress%")
-    }
-
-    private fun showCompletionNotification(success: Boolean, cancelled: Boolean = false) {
-        stopForegroundService()
-
-        val notificationText = when {
-            cancelled -> getString(R.string.conversion_cancelled)
-            success -> getString(R.string.conversion_success)
-            else -> getString(R.string.conversion_failed)
-        }
-
-        Log.i(TAG, "Showing completion notification: $notificationText")
-
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(getString(R.string.conversion_status)).setContentText(notificationText)
-            .setSmallIcon(R.mipmap.ic_launcher_foreground).setAutoCancel(true).build()
-
-        if (ActivityCompat.checkSelfPermission(
-                this, Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            Log.w(
-                TAG,
-                "Notification permission not granted. Skipping completion notification for status: $success"
-            )
-            return
-        }
-
-        NotificationManagerCompat.from(this).notify(notificationId, notification)
     }
 }

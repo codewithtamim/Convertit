@@ -1,14 +1,22 @@
 <resources>
 
-    <string name="app_name">Convertit</string>
+    <string name="app_name" translatable="false">Convertit</string>
     <string name="label_file_size">%1$.1f %2$s</string>
     <string name="converting_audio_files">Converting Files</string>
     <string name="label_about_title">About</string>
-    <string name="label_about_app">ConvertIt is an ad-free Android app for converting audio and video files to various formats like FLAC, ALAC, MP3, WAV, AAC, OGG, M4A, AIFF, OPUS, WMA, MKA, and SPX. Built with Kotlin, Compose, and FFmpeg, it offers flexible bitrate options for high-quality conversions. Video-to-audio conversion is also supported. Contributions are welcome!</string>
+    <string name="label_about_app">Convertit is an offline media toolkit for audio and video conversion. Convert between formats including MP3, FLAC, WAV, AAC, OGG, M4A, OPUS, and more. Edit audio metadata and tags. Powered by FFmpeg and TagLib. No data collection. No analytics. No ads.</string>
     <string name="label_contact">Contact</string>
     <string name="label_converting_audio">Processing in Background</string>
     <string name="label_storage_permissions_are_already_granted">Storage permissions have been granted</string>
     <string name="label_conversion_failed_for_file_with_return_code">Conversion failed for file: %1$s (Error code: %2$s)</string>
+    <string name="label_cue_file_detected">CUE file detected - splitting into %1$d tracks</string>
+    <string name="label_cue_track_conversion_started">Converting track %1$d: %2$s</string>
+    <string name="label_embedded_cue_found">Found embedded CUE sheet in FLAC file</string>
+    <string name="label_cue_splitting">Track Splitting</string>
+    <string name="label_enable_track_splitting">Split into individual tracks</string>
+    <string name="label_select_cue_file">Select CUE File</string>
+    <string name="label_cue_file_selected">CUE File Selected</string>
+    <string name="label_invalid_cue_file">Please select a valid CUE file (.cue extension)</string>
     <string name="label_metadata_update_failed_with_return_code">Metadata update failed (Error code: %1$d)</string>
     <string name="label_no_app_found_to_open_the_file">No application found to open this file</string>
     <string name="label_file_does_not_exist">File not found</string>
@@ -16,14 +24,14 @@
     <string name="label_restart">Restart</string>
     <string name="label_title_action_dialog">Quick Actions</string>
     <string name="label_choose_action">Select an action</string>
-    <string name="label_delete">Delete</string>
+
     <string name="label_view_metadata">View Metadata</string>
     <string name="label_version">Version: %1$s</string>
     <string name="label_cancel">Cancel</string>
     <string name="label_successfully_converted">Conversion completed successfully</string>
     <string name="label_failed_to_convert">Conversion failed</string>
     <string name="label_conversion_started_with_bitrate_and_format_please_wait">Starting conversion with %1$s bitrate and %2$s format. Please wait.</string>
-    <string name="label_file_deleted_successfully">File has been deleted successfully</string>
+
     <string name="label_something_went_wrong_status_failed">An error occurred during the operation</string>
     <string name="label_about">About</string>
     <string name="label_discord">Discord</string>
@@ -49,12 +57,17 @@
     <string name="conversion_cancelled">Conversion Cancelled</string>
     <string name="conversion_status">Conversion Status</string>
     <string name="label_failed_to_copy_file_from_uri">Failed to copy file from source</string>
-    <string name="label_delete_item">Delete Item</string>
-    <string name="label_delete_confirmation">Are you sure you want to delete this item? This action cannot be undone.</string>
+
     <string name="label_back">Back</string>
     <string name="label_share_icon">Share Icon</string>
     <string name="label_play_icon">Play Icon</string>
+    <string name="label_open_icon">Open Icon</string>
+    <string name="label_select_item">Select Item</string>
     <string name="label_audio_icon">Audio Icon</string>
+    <string name="label_converted_audio">Converted Audio</string>
+    <string name="label_share_selected">Share Selected</string>
+    <string name="label_selected_count">%1$d selected</string>
+    <string name="label_clear_selection">Clear Selection</string>
     <string name="label_select_format">Select Format</string>
     <string name="label_select_bitrate">Select Bitrate</string>
     <string name="label_contact_us">Contact Us</string>
@@ -69,8 +82,20 @@
     <string name="label_conversion_successful">Conversion completed successfully</string>
     <string name="label_warning">Please wait for the current conversion to complete</string>
     <string name="label_conversion_settings">Conversion Settings</string>
+    <string name="label_beta">Beta</string>
+    <string name="label_conversion_estimate_title">Estimate</string>
+    <string name="label_conversion_estimate_label_size">Size</string>
+    <string name="label_conversion_estimate_label_time">Time</string>
+    <string name="label_conversion_estimate_size">Approx. output size: %1$s</string>
+    <string name="label_conversion_estimate_size_range">Approx. output size: %1$s–%2$s</string>
+    <string name="label_conversion_estimate_time">Approx. encode time: %1$s</string>
+    <string name="label_conversion_estimate_video_size_note">Output size depends heavily on video and audio settings.</string>
+    <string name="label_conversion_estimate_unavailable">Estimates appear after duration is detected.</string>
+    <string name="label_conversion_estimate_loading">Calculating…</string>
+    <string name="label_conversion_estimate_device_note">Encode time varies by device and file complexity.</string>
     <string name="label_slider">Playback Speed</string>
     <string name="cd_star_icon">Star Icon</string>
+    <string name="label_sample_rate_options">Sample Rate</string>
     <string name="title_review">If you enjoy using our application, please take a moment to rate us on Google Play</string>
     <string name="label_google_play">https://play.google.com/store/apps/details?id=%1$s</string>
     <string name="label_review">Rate Us</string>
@@ -99,12 +124,16 @@
     <string name="label_about_screen">About</string>
     <string name="label_sample_audio">Sample Audio File</string>
     <string name="label_sample_size">100KB</string>
-    <string name="label_no_files_found">No converted files found. \nTry converting some! 🙂</string>
+    <string name="label_no_files_found">No converted files found. \nTry converting some!</string>
     
     <!-- Metadata Editor Strings -->
     <string name="label_edit_metadata">Edit Metadata</string>
     <string name="label_cover_art">Cover Art</string>
     <string name="label_no_cover_art">No Cover Art</string>
+    <string name="label_tap_to_change">Tap to change</string>
+    <string name="label_track_info">Track Info</string>
+    <string name="label_artist_info">Artist Info</string>
+    <string name="label_album_info">Album Info</string>
     <string name="label_change">Change</string>
     <string name="label_add">Add</string>
     <string name="label_remove">Remove</string>
@@ -117,7 +146,7 @@
     <string name="label_year">Year</string>
     <string name="label_track_number">Track Number</string>
     <string name="label_comment">Comment</string>
-    <string name="label_saving">Saving...</string>
+    <string name="label_saving">Saving…</string>
     <string name="label_save">Save</string>
     <string name="label_metadata_saved_successfully">Metadata saved successfully</string>
     <string name="label_failed_to_save_metadata">Failed to save metadata</string>
@@ -125,14 +154,108 @@
     <string name="label_failed_to_load_metadata">Failed to load metadata: %1$s</string>
     <string name="label_failed_to_load_image">Failed to load image: %1$s</string>
     <string name="label_please_select_image_only">Please select an image file only</string>
-    
-    <!-- Expandable FAB Strings -->
+
     <string name="label_edit_metadata_action">Edit Metadata</string>
     <string name="label_convert_audio_action">Convert Audio</string>
+    <string name="label_convert_video_action">Convert Video</string>
+    <string name="label_custom_save_location_action">Save Location</string>
     <string name="label_close">Close</string>
     <string name="label_actions">Actions</string>
-    
-    <!-- Version String -->
+    <string name="label_expanded">Expanded</string>
+    <string name="label_collapsed">Collapsed</string>
+
     <string name="label_version_text">Version %1$s</string>
+
+    <!-- About screen — chip descriptions -->
+    <string name="label_about_chip_channel">Channel</string>
+    <string name="label_about_chip_repository">Repository</string>
+    <string name="label_about_chip_community">Community</string>
+    <string name="label_about_chip_version">App version</string>
+    <string name="label_about_chip_license">License</string>
+    <string name="label_about_developer">Developer</string>
+
+    <!-- Premium Upgrade Dialog (kept for reference, dialog removed) -->
+    <string name="premium_play_store_url" translatable="false">https://play.google.com/store/apps/details?id=org.thebytearray.convertit</string>
+
+    <!-- Pro Feature Strings -->
+    <string name="pro_upgrade_dialog_title">Unlock Pro</string>
+    <string name="pro_upgrade_description">Upgrade to Pro to unlock advanced conversion features and take full control of your media.</string>
+    <string name="pro_feature_audio_normalization">Audio Normalization (-14 LUFS)</string>
+    <string name="pro_feature_video_codecs">H.264 &amp; H.265/HEVC Codecs</string>
+    <string name="pro_feature_quality_control">Video Quality &amp; Resolution</string>
+    <string name="pro_feature_channel_control">Advanced Channel Control</string>
+    <string name="pro_feature_more">And 10+ more features</string>
+    
+    <!-- Locked Pro Feature Labels -->
+    <string name="pro_label_audio_normalization">Audio Normalization</string>
+    <string name="pro_hint_audio_normalization">Normalize to standard loudness</string>
+    <string name="pro_label_channel_control">Channel Configuration</string>
+    <string name="pro_hint_channel_control">Mono, Stereo, 5.1 Surround</string>
+    <string name="pro_label_video_codec">Video Codec</string>
+    <string name="pro_hint_video_codec">H.264 (AVC) or H.265 (HEVC)</string>
+    <string name="pro_label_video_quality">Quality Preset</string>
+    <string name="pro_hint_video_quality">Compression level control</string>
+    <string name="pro_label_video_resolution">Resolution</string>
+    <string name="pro_hint_video_resolution">Output resolution</string>
+    <string name="pro_label_batch_metadata">Batch Metadata Editor</string>
+    <string name="pro_hint_batch_metadata">Edit multiple files at once</string>
+
+    <!-- Conversion dialog — Pro tools (Material 3 section) -->
+    <string name="pro_dialog_tools_title">Pro tools</string>
+    <string name="pro_dialog_tools_hint_expanded">Tap to collapse</string>
+    <string name="pro_dialog_tools_hint_collapsed">Presets, channel, trim, CUE sheets, silence removal, and AI noise reduction</string>
+    <string name="pro_dialog_chip_label">Pro</string>
+    <string name="pro_dialog_channel_auto">Auto</string>
+    <string name="pro_dialog_presets_title">Presets</string>
+    <string name="pro_dialog_presets_subtitle">Save and load conversion presets</string>
+    <string name="pro_dialog_channel_title">Channel control</string>
+    <string name="pro_dialog_channel_subtitle">Auto, mono, or stereo</string>
+    <string name="pro_dialog_trim_title">Trim audio/video</string>
+    <string name="pro_dialog_trim_subtitle">Cut and extract specific portions</string>
+    <string name="pro_dialog_cue_title">CUE track splitting</string>
+    <string name="pro_dialog_cue_subtitle">Split audio using CUE sheet files</string>
+    <string name="pro_dialog_silence_title">Silence removal</string>
+    <string name="pro_dialog_silence_subtitle">Remove silent portions from audio automatically</string>
+    <string name="pro_dialog_noise_title">AI noise reduction</string>
+    <string name="pro_dialog_noise_subtitle">Clean audio/video with on-device AI</string>
+    <string name="pro_dialog_video_compression_title">Video compression</string>
+    <string name="pro_dialog_video_compression_subtitle">Smaller files with tuned quality</string>
+    <string name="pro_dialog_a11y_expand_tools">Expand Pro tools</string>
+    <string name="pro_dialog_a11y_collapse_tools">Collapse Pro tools</string>
+    <string name="pro_dialog_locked_feature_a11y">Locked Pro feature</string>
+    
+    <!-- Conversion Success Snackbar -->
+    <string name="conversion_success_message">Conversion completed!</string>
+    <string name="label_version_copied">Version %1$s copied</string>
+    <string name="label_view_file">View File</string>
+    
+    <!-- Pro Screen -->
+    <string name="pro_screen_appbar_title">Convertit Pro</string>
+    
+    <!-- Headlines - Natural, honest -->
+    <string name="pro_headline">This is the free version</string>
+    <string name="pro_subheadline">Pro gives you everything without limits</string>
+    
+    <!-- Locked Features - Straightforward, all of them -->
+    <string name="pro_locked_features_title">You don\'t have access to:</string>
+    <string name="pro_locked_feature_1">Image converter (HEIC, HEIF, AVIF, and more)</string>
+    <string name="pro_locked_feature_2">Video to Video Conversion</string>
+    <string name="pro_locked_feature_3">x265 &amp; x264 Codec Support</string>
+    <string name="pro_locked_feature_4">Audio &amp; Video Trimming</string>
+    <string name="pro_locked_feature_5">Track Splitting (CUE files)</string>
+    <string name="pro_locked_feature_6">Noise reduction with on-device AI (local, private)</string>
+    <string name="pro_locked_feature_7">Mono/Stereo Channel Control</string>
+    <string name="pro_locked_feature_8">EXIF Metadata Removal</string>
+    <string name="pro_locked_feature_9">Auto Remove Silence</string>
+    <string name="pro_locked_feature_10">Create &amp; Save Presets</string>
+    <string name="pro_locked_feature_11">Video to GIF</string>
+    <string name="pro_locked_feature_12">Video compression (smaller files, tuned quality)</string>
+    
+    <!-- The deal - Honest -->
+    <string name="pro_deal_text">Pay once. Use forever. No subscriptions, no ads, no tracking.</string>
+    
+    <!-- CTA - Single, clear -->
+    <string name="pro_cta_button">Get Pro</string>
+    <string name="pro_price_note">One-time purchase</string>
 
 </resources>

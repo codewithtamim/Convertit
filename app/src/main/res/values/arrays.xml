@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="bitrates_array">
+        <item>9k</item>
+        <item>16k</item>
+        <item>24k</item>
+        <item>32k</item>
+        <item>48k</item>
+        <item>64k</item>
+        <item>96k</item>
+        <item>128k</item>
+        <item>192k</item>
+        <item>256k</item>
+        <item>320k</item>
+        <item>512k</item>
+        <item>768k</item>
+        <item>1024k</item>
+    </string-array>
+
+    <string-array name="format_array">
+        <item>.mp3</item>
+        <item>.m4a</item>
+        <item>.aac</item>
+        <item>.ogg</item>
+        <item>.opus</item>
+        <item>.wma</item>
+        <item>.mka</item>
+        <item>.spx</item>
+        <item>.amr</item>
+    </string-array>
+
+
+    <string-array name="bitrates_mp3">
+        <item>64k</item>
+        <item>96k</item>
+        <item>128k</item>
+        <item>192k</item>
+        <item>256k</item>
+        <item>320k</item>
+    </string-array>
+
+    <string-array name="bitrates_aac">
+        <item>64k</item>
+        <item>96k</item>
+        <item>128k</item>
+        <item>192k</item>
+        <item>256k</item>
+        <item>320k</item>
+    </string-array>
+
+    <string-array name="bitrates_m4a">
+        <item>64k</item>
+        <item>96k</item>
+        <item>128k</item>
+        <item>192k</item>
+        <item>256k</item>
+        <item>320k</item>
+        <item>512k</item>
+    </string-array>
+
+    <string-array name="bitrates_ogg">
+        <item>64k</item>
+        <item>96k</item>
+        <item>128k</item>
+        <item>192k</item>
+        <item>256k</item>
+        <item>320k</item>
+        <item>512k</item>
+    </string-array>
+
+    <string-array name="bitrates_opus">
+        <item>16k</item>
+        <item>24k</item>
+        <item>32k</item>
+        <item>48k</item>
+        <item>64k</item>
+        <item>96k</item>
+        <item>128k</item>
+        <item>192k</item>
+        <item>256k</item>
+        <item>320k</item>
+    </string-array>
+
+    <string-array name="bitrates_wma">
+        <item>64k</item>
+        <item>96k</item>
+        <item>128k</item>
+        <item>192k</item>
+        <item>256k</item>
+        <item>320k</item>
+    </string-array>
+
+    <string-array name="bitrates_mka">
+        <item>64k</item>
+        <item>96k</item>
+        <item>128k</item>
+        <item>192k</item>
+        <item>256k</item>
+        <item>320k</item>
+        <item>512k</item>
+        <item>768k</item>
+        <item>1024k</item>
+    </string-array>
+
+    <string-array name="bitrates_spx">
+        <item>64k</item>
+        <item>96k</item>
+        <item>128k</item>
+        <item>192k</item>
+    </string-array>
+
+    <string-array name="bitrates_amr">
+        <item>9k</item>
+        <item>16k</item>
+        <item>24k</item>
+    </string-array>
+
+    <string-array name="sample_rates_array">
+        <item>8000</item>
+        <item>12000</item>
+        <item>16000</item>
+        <item>22050</item>
+        <item>24000</item>
+        <item>32000</item>
+        <item>44100</item>
+        <item>48000</item>
+        <item>88200</item>
+        <item>96000</item>
+        <item>192000</item>
+    </string-array>
+
+    <string-array name="sample_rates_mp3">
+        <item>22050</item>
+        <item>24000</item>
+        <item>32000</item>
+        <item>44100</item>
+        <item>48000</item>
+    </string-array>
+
+    <string-array name="sample_rates_aac">
+        <item>22050</item>
+        <item>24000</item>
+        <item>32000</item>
+        <item>44100</item>
+        <item>48000</item>
+    </string-array>
+
+    <string-array name="sample_rates_m4a">
+        <item>22050</item>
+        <item>24000</item>
+        <item>32000</item>
+        <item>44100</item>
+        <item>48000</item>
+    </string-array>
+
+    <string-array name="sample_rates_ogg">
+        <item>22050</item>
+        <item>24000</item>
+        <item>32000</item>
+        <item>44100</item>
+        <item>48000</item>
+    </string-array>
+
+    <string-array name="sample_rates_opus">
+        <item>8000</item>
+        <item>12000</item>
+        <item>16000</item>
+        <item>24000</item>
+        <item>48000</item>
+    </string-array>
+
+    <string-array name="sample_rates_wma">
+        <item>22050</item>
+        <item>24000</item>
+        <item>32000</item>
+        <item>44100</item>
+        <item>48000</item>
+    </string-array>
+
+    <string-array name="sample_rates_mka">
+        <item>22050</item>
+        <item>24000</item>
+        <item>32000</item>
+        <item>44100</item>
+        <item>48000</item>
+        <item>96000</item>
+        <item>192000</item>
+    </string-array>
+
+    <string-array name="sample_rates_spx">
+        <item>8000</item>
+        <item>16000</item>
+        <item>32000</item>
+    </string-array>
+
+    <string-array name="sample_rates_amr">
+        <item>8000</item>
+        <item>16000</item>
+    </string-array>
+
+</resources>

@@ -2,47 +2,49 @@ package com.nasahacker.convertit.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.nasahacker.convertit.dto.BottomNavigation
-import com.nasahacker.convertit.ui.screen.ConvertsScreen
-import com.nasahacker.convertit.ui.screen.HomeScreen
-import com.nasahacker.convertit.ui.screen.AboutScreen
-import com.nasahacker.convertit.ui.viewmodel.AppViewModel
+import com.nasahacker.convertit.domain.model.BottomNavigation
+import com.nasahacker.convertit.ui.about.AboutScreen
+import com.nasahacker.convertit.ui.home.HomeScreen
+import com.nasahacker.convertit.ui.home.HomeViewModel
+import com.nasahacker.convertit.ui.library.LibraryScreen
+import com.nasahacker.convertit.ui.pro.ProScreen
 
 /**
- * @author Tamim Hossain
- * @email tamimh.dev@gmail.com
- * @license Apache-2.0
+ * Convertit Android app
  *
- * ConvertIt is a free and easy-to-use audio converter app.
- * It supports popular audio formats like MP3 and M4A.
- * With options for high-quality bitrates ranging from 128k to 320k,
- * ConvertIt offers a seamless conversion experience tailored to your needs.
+ * Created by Tamim Hossain.
+ * Copyright (c) 2025 The Byte Array LTD.
+ *
+ * @author Tamim Hossain
+ * @company The Byte Array LTD
+ * @year 2025
  */
 
 @Composable
 fun AppNavHost(
     modifier: Modifier = Modifier,
     controller: NavHostController,
+    homeViewModel: HomeViewModel,
 ) {
-    val viewModel: AppViewModel = viewModel()
-
     NavHost(
         modifier = modifier,
         navController = controller,
         startDestination = BottomNavigation.Home.route,
     ) {
         composable(BottomNavigation.Home.route) {
-            HomeScreen(viewModel = viewModel)
+            HomeScreen(viewModel = homeViewModel)
         }
         composable(BottomNavigation.Library.route) {
-            ConvertsScreen()
+            LibraryScreen()
         }
         composable("about") {
-            AboutScreen()
+            AboutScreen(onNavigateBack = { controller.popBackStack() })
+        }
+        composable("pro") {
+            ProScreen(onNavigateBack = { controller.popBackStack() })
         }
     }
 }
