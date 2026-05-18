@@ -46,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -113,6 +114,7 @@ fun AboutScreen(onNavigateBack: (() -> Unit)? = null) {
                         .animateItem(),
                     onTelegram = { intentLauncher.openLink(AppConfig.TELEGRAM_CHANNEL) },
                     onDiscord = { intentLauncher.openLink(AppConfig.DISCORD_CHANNEL) },
+                    onGitHub = { intentLauncher.openLink(AppConfig.GITHUB_REPO) },
                     onCopyVersion = {
                         copyVersionToClipboard(context, BuildConfig.VERSION_NAME)
                     },
@@ -188,6 +190,7 @@ private fun LinkChips(
     modifier: Modifier = Modifier,
     onTelegram: () -> Unit,
     onDiscord: () -> Unit,
+    onGitHub: () -> Unit,
     onCopyVersion: () -> Unit,
 ) {
     FlowRow(
@@ -211,6 +214,14 @@ private fun LinkChips(
             containerColor = MaterialTheme.colorScheme.tertiaryContainer,
             contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
             onClick = onDiscord,
+        )
+        AppHandlesChip(
+            title = stringResource(R.string.label_github),
+            description = stringResource(R.string.label_about_chip_repository),
+            iconPainter = painterResource(R.drawable.github_ic),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            onClick = onGitHub,
         )
         AppHandlesChip(
             title = BuildConfig.VERSION_NAME,
