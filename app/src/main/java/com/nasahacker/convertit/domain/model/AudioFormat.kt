@@ -42,6 +42,7 @@ enum class AudioFormat(
     MKA(".mka"),
     SPX(".spx"),
     AMR_WB(".amr"),
+    AVI(".avi"),
     ;
 
     companion object {

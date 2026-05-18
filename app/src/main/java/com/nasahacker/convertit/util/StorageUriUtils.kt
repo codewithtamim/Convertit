@@ -24,5 +24,6 @@ object StorageUriUtils {
             AudioFormat.MKA -> "audio/x-matroska"
             AudioFormat.SPX -> "audio/ogg"
             AudioFormat.AMR_WB -> "audio/amr"
+            AudioFormat.AVI -> "video/x-msvideo"
         }
 }

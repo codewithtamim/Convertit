@@ -167,6 +167,7 @@ fun DialogConvertContent(
     val bitratesWma = stringArrayResource(R.array.bitrates_wma).toList()
     val bitratesMka = stringArrayResource(R.array.bitrates_mka).toList()
     val bitratesSpx = stringArrayResource(R.array.bitrates_spx).toList()
+    val bitratesAvi = stringArrayResource(R.array.bitrates_avi).toList()
     val bitratesArray = stringArrayResource(R.array.bitrates_array).toList()
 
     val sampleRatesGeneric = stringArrayResource(R.array.sample_rates_array).toList()
@@ -179,6 +180,7 @@ fun DialogConvertContent(
     val sampleRatesMka = stringArrayResource(R.array.sample_rates_mka).toList()
     val sampleRatesSpx = stringArrayResource(R.array.sample_rates_spx).toList()
     val sampleRatesAmr = stringArrayResource(R.array.sample_rates_amr).toList()
+    val sampleRatesAvi = stringArrayResource(R.array.sample_rates_avi).toList()
 
     val bitrateOptions =
         remember(selectedFormat) {
@@ -191,6 +193,7 @@ fun DialogConvertContent(
                 ".wma" -> bitratesWma
                 ".mka" -> bitratesMka
                 ".spx" -> bitratesSpx
+                ".avi" -> bitratesAvi
                 else -> bitratesArray
             }
         }
@@ -207,6 +210,7 @@ fun DialogConvertContent(
                 ".mka" -> sampleRatesMka
                 ".spx" -> sampleRatesSpx
                 ".amr" -> sampleRatesAmr
+                ".avi" -> sampleRatesAvi
                 else -> sampleRatesGeneric
             }
         }
@@ -264,6 +268,7 @@ fun DialogConvertContent(
                                 ".wma" -> bitratesWma
                                 ".mka" -> bitratesMka
                                 ".spx" -> bitratesSpx
+                                ".avi" -> bitratesAvi
                                 else -> bitratesArray
                             }
                             val validSampleRates = when (it) {
@@ -276,6 +281,7 @@ fun DialogConvertContent(
                                 ".mka" -> sampleRatesMka
                                 ".spx" -> sampleRatesSpx
                                 ".amr" -> sampleRatesAmr
+                                ".avi" -> sampleRatesAvi
                                 else -> sampleRatesGeneric
                             }
                             onSampleRateSelected(validSampleRates.first())

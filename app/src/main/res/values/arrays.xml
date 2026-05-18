@@ -27,6 +27,7 @@
         <item>.mka</item>
         <item>.spx</item>
         <item>.amr</item>
+        <item>.avi</item>
     </string-array>
 
 
@@ -115,6 +116,16 @@
         <item>24k</item>
     </string-array>
 
+    <string-array name="bitrates_avi">
+        <item>64k</item>
+        <item>96k</item>
+        <item>128k</item>
+        <item>192k</item>
+        <item>256k</item>
+        <item>320k</item>
+        <item>512k</item>
+    </string-array>
+
     <string-array name="sample_rates_array">
         <item>8000</item>
         <item>12000</item>
@@ -196,6 +207,13 @@
     <string-array name="sample_rates_amr">
         <item>8000</item>
         <item>16000</item>
+    </string-array>
+
+    <string-array name="sample_rates_avi">
+        <item>22050</item>
+        <item>32000</item>
+        <item>44100</item>
+        <item>48000</item>
     </string-array>
 
 </resources>

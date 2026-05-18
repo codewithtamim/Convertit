@@ -42,6 +42,7 @@ enum class AudioCodec(
     MKA("libvorbis"),
     SPX("libspeex"),
     AMR_WB("amr_wb"),
+    AVI("mpeg4"),
     ;
 
     companion object {
@@ -59,6 +60,7 @@ enum class AudioCodec(
                 AudioFormat.SPX -> SPX
                 AudioFormat.FLAC -> FLAC
                 AudioFormat.AMR_WB -> AMR_WB
+                AudioFormat.AVI -> AVI
             }
     }
 }
