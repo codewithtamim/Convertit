@@ -67,4 +67,5 @@ object AppConfig {
     const val GITHUB_PROFILE = "https://github.com/codewithtamim"
     const val GITHUB_PROFILE_MOD = "https://github.com/moontahid"
     const val TELEGRAM_CHANNEL = "https://t.me/thebytearray"
+    const val GITHUB_REPO = "https://github.com/TheByteArray/ConvertIt"
 }
