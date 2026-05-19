@@ -27,10 +27,10 @@ ConvertIt supports a wide range of audio and video formats and provides the foll
 <a name="screenshots"></a>
 ## Screenshots
 
-<p align=\"center\">
-  <img src=\"art/img.png\" alt=\"ConvertIt Home\" width=\"280\"/>
-  <img src=\"art/img_1.png\" alt=\"ConvertIt Conversion\" width=\"280\"/>
-  <img src=\"art/img_2.png\" alt=\"ConvertIt Library\" width=\"280\"/>
+<p align="center">
+  <img src="art/img.png" alt="ConvertIt Home" width="280"/>
+  <img src="art/img_1.png" alt="ConvertIt Conversion" width="280"/>
+  <img src="art/img_2.png" alt"ConvertIt Library" width="280"/>
 </p>
 
 <a name="download"></a>
