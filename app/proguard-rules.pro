@@ -15,3 +15,11 @@
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
 #-keepattributes SourceFile,LineNumberTable
+
+# TagLib library - Keep native methods and classes
+-keep class org.thebytearray.taglib_android.** { *; }
+-keepclassmembers class org.thebytearray.taglib_android.** { *; }
+
+# FFmpegKit - Keep native libraries
+-keep class com.arthenica.ffmpegkit.** { *; }
+-keepclassmembers class com.arthenica.ffmpegkit.** { *; }

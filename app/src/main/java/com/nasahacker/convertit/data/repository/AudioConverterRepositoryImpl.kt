@@ -217,6 +217,8 @@ class AudioConverterRepositoryImpl
 
                         val mediaDuration = durationMsFromFilePath(tempFile.absolutePath)
 
+                        val coverArtPath = extractCoverArt(tempFile.absolutePath)
+
                         val ffmpegArgs = buildFFmpegArgs(
                             tempFile.absolutePath,
                             outputFilePath,
@@ -224,16 +226,20 @@ class AudioConverterRepositoryImpl
                             bitrate,
                             playbackSpeed,
                             sampleRate,
+                            coverArtPath,
                         )
                         
                         val sessionCompleted = CompletableDeferred<Boolean>()
                         val currentUri = uri
                         val finalOutputPath = outputFilePath
                         
+                        val coverArtPathFinal = coverArtPath
+
                         FFmpegKit.executeWithArgumentsAsync(
                             ffmpegArgs,
                             { session ->
                                 tempFile.delete()
+                                coverArtPathFinal?.let { File(it).delete() }
 
                                 if (ReturnCode.isSuccess(session.returnCode)) {
                                     val recordedOutput =
@@ -323,71 +329,53 @@ class AudioConverterRepositoryImpl
             bitrate: AudioBitrate,
             playbackSpeed: String,
             sampleRate: AudioSampleRate,
+            coverArtPath: String? = null,
         ): Array<String> {
-            Log.d(TAG, "Building FFmpeg args for format: ${outputFormat.extension}, bitrate: ${bitrate.bitrate}, sr: ${sampleRate.hz}")
-            return when (outputFormat) {
+            Log.d(TAG, "Building FFmpeg args for format: ${outputFormat.extension}, bitrate: ${bitrate.bitrate}, sr: ${sampleRate.hz}, hasCover: ${coverArtPath != null}")
+
+            val args = mutableListOf<String>()
+            args.addAll(listOf("-y", "-i", inputPath))
+
+            if (coverArtPath != null) {
+                args.addAll(listOf("-i", coverArtPath))
+            }
+
+            if (coverArtPath != null) {
+                args.addAll(listOf("-map", "0:a"))
+                args.addAll(listOf("-map", "1:v"))
+                args.addAll(listOf("-c:v", "mjpeg"))
+                args.addAll(listOf("-disposition:v", "attached_pic"))
+            } else {
+                args.addAll(listOf("-map", "0:a"))
+                args.addAll(listOf("-vn"))
+            }
+
+            args.addAll(listOf("-map_metadata", "0"))
+
+            when (outputFormat) {
                 AudioFormat.AMR_WB -> {
-                    arrayOf(
-                        "-y",
-                        "-i", inputPath,
-                        "-map", "0:a",  // Only map audio streams
-                        "-vn",          // Disable video streams
-                        "-map_metadata", "0", // Preserve input metadata
-                        "-ar", "16000",           
-                        "-ac", "1",             
-                        "-c:a", AudioCodec.fromFormat(outputFormat).codec,
-                        "-b:a", bitrate.bitrate,
-                        "-filter:a", "atempo=$playbackSpeed",
-                        outputPath
-                    )
+                    args.addAll(listOf("-ar", "16000", "-ac", "1"))
                 }
                 AudioFormat.OPUS -> {
-
+                    args.addAll(listOf("-ar", sampleRate.hz))
                     if (bitrate.bitrate.replace("k", "").toIntOrNull()?.let { it <= 48 } == true) {
-                        arrayOf(
-                            "-y",
-                            "-i", inputPath,
-                            "-map", "0:a",   
-                            "-vn",          
-                            "-map_metadata", "0", // Preserve input metadata
-                            "-ar", sampleRate.hz,
-                            "-c:a", AudioCodec.fromFormat(outputFormat).codec,
-                            "-b:a", bitrate.bitrate,
-                            "-application", "voip",   
-                            "-filter:a", "atempo=$playbackSpeed",
-                            outputPath
-                        )
-                    } else {
-                       
-                        arrayOf(
-                            "-y",
-                            "-i", inputPath,
-                            "-map", "0:a",   
-                            "-vn",           
-                            "-map_metadata", "0", // Preserve input metadata
-                            "-ar", sampleRate.hz,
-                            "-c:a", AudioCodec.fromFormat(outputFormat).codec,
-                            "-b:a", bitrate.bitrate,
-                            "-filter:a", "atempo=$playbackSpeed",
-                            outputPath
-                        )
+                        args.addAll(listOf("-application", "voip"))
                     }
                 }
                 else -> {
-                    arrayOf(
-                        "-y",
-                        "-i", inputPath,
-                        "-map", "0:a",  
-                        "-vn",          
-                        "-map_metadata", "0", // Preserve input metadata
-                        "-ar", sampleRate.hz,
-                        "-c:a", AudioCodec.fromFormat(outputFormat).codec,
-                        "-b:a", bitrate.bitrate,
-                        "-filter:a", "atempo=$playbackSpeed",
-                        outputPath
-                    )
+                    args.addAll(listOf("-ar", sampleRate.hz))
                 }
             }
+
+            args.addAll(listOf("-c:a", AudioCodec.fromFormat(outputFormat).codec))
+            args.addAll(listOf("-b:a", bitrate.bitrate))
+
+            if (playbackSpeed != "1.0") {
+                args.addAll(listOf("-filter:a", "atempo=$playbackSpeed"))
+            }
+
+            args.add(outputPath)
+            return args.toTypedArray()
         }
 
         private fun durationMsFromFilePath(filePath: String): Long =
@@ -408,6 +396,29 @@ class AudioConverterRepositoryImpl
                 Log.e("AudioConverter", "Error getting audio duration: ${e.message}")
                 0L
             }
+
+        private fun extractCoverArt(inputPath: String): String? {
+            return try {
+                val outputPath = File(context.cacheDir, "cover_${System.currentTimeMillis()}.jpg").absolutePath
+                val extractArgs = arrayOf(
+                    "-i", inputPath,
+                    "-an",
+                    "-vcodec",
+                    "copy",
+                    "-y",
+                    outputPath
+                )
+                val session = FFmpegKit.executeWithArguments(extractArgs)
+                if (ReturnCode.isSuccess(session.returnCode) && File(outputPath).exists()) {
+                    outputPath
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
+                Log.d(TAG, "No cover art found or error extracting: ${e.message}")
+                null
+            }
+        }
 
         override suspend fun convertWithCueSplitting(
             customSaveUri: Uri?,
@@ -432,7 +443,8 @@ class AudioConverterRepositoryImpl
                     FileOutputStream(tempAudioFile).use { outputStream ->
                         inputStream.copyTo(outputStream)
                     }
-                    
+
+                    val coverArtPath = extractCoverArt(tempAudioFile.absolutePath)
 
                     val cueFile = findCueFileForUri(uri)
                     if (cueFile == null) {
@@ -489,6 +501,7 @@ class AudioConverterRepositoryImpl
                             playbackSpeed,
                             track,
                             sampleRate,
+                            coverArtPath,
                         )
                         
                         try {
@@ -549,7 +562,7 @@ class AudioConverterRepositoryImpl
                     }
                     
                     tempAudioFile.delete()
-                    
+                    coverArtPath?.let { File(it).delete() }
 
                     val cueFileName = cueFile.name
                     if (cueFileName.endsWith("_embedded.cue")) {
@@ -602,15 +615,25 @@ class AudioConverterRepositoryImpl
             playbackSpeed: String,
             track: CueTrack,
             sampleRate: AudioSampleRate,
+            coverArtPath: String? = null,
         ): Array<String> {
             val args = mutableListOf<String>()
-            
+
             args.addAll(arrayOf("-y", "-i", inputPath))
-            
 
-            args.addAll(arrayOf("-map", "0:a", "-vn"))
+            if (coverArtPath != null) {
+                args.addAll(arrayOf("-i", coverArtPath))
+            }
 
-            // Preserve input metadata on the output
+            if (coverArtPath != null) {
+                args.addAll(arrayOf("-map", "0:a"))
+                args.addAll(arrayOf("-map", "1:v"))
+                args.addAll(arrayOf("-c:v", "mjpeg"))
+                args.addAll(arrayOf("-disposition:v", "attached_pic"))
+            } else {
+                args.addAll(arrayOf("-map", "0:a", "-vn"))
+            }
+
             args.addAll(arrayOf("-map_metadata", "0"))
 
             args.addAll(arrayOf("-ss", CueParser.formatSecondsForFFmpeg(track.startTimeSeconds)))
@@ -690,7 +713,9 @@ class AudioConverterRepositoryImpl
                     FileOutputStream(tempAudioFile).use { outputStream ->
                         audioInputStream.copyTo(outputStream)
                     }
-                    
+
+                    val coverArtPath = extractCoverArt(tempAudioFile.absolutePath)
+
                     context.contentResolver.openInputStream(cueUri)?.use { cueInputStream ->
                         val cueFileName = getFileName(context.contentResolver, cueUri)
                         if (!cueFileName.lowercase().endsWith(".cue")) {
@@ -746,6 +771,7 @@ class AudioConverterRepositoryImpl
                                 playbackSpeed,
                                 track,
                                 sampleRate,
+                                coverArtPath,
                             )
                             
                             try {
@@ -783,17 +809,20 @@ class AudioConverterRepositoryImpl
                                     Log.e(TAG, "Failed to convert track ${track.trackNumber}: ${session.failStackTrace}")
                                     onFailure("Failed to convert track ${track.trackNumber}: ${track.title}")
                                     tempAudioFile.delete()
+                                    coverArtPath?.let { File(it).delete() }
                                     return
                                 }
                             } catch (e: Exception) {
                                 Log.e(TAG, "Error converting track ${track.trackNumber}: ${e.message}")
                                 onFailure("Error converting track ${track.trackNumber}: ${e.message}")
                                 tempAudioFile.delete()
+                                coverArtPath?.let { File(it).delete() }
                                 return
                             }
                         }
-                        
+
                         tempAudioFile.delete()
+                        coverArtPath?.let { File(it).delete() }
                         onSuccess(outputPaths)
                     }
                 }
