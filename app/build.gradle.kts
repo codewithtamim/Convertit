@@ -57,7 +57,7 @@ android {
 
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar", "*.jar"))))
-    implementation("org.thebytearray.lib:taglib:1.0.3")
+    implementation("org.thebytearray.lib:taglib:1.0.7")
     implementation("androidx.documentfile:documentfile:1.1.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
