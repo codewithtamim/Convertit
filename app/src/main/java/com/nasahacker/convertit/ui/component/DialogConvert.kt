@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,6 +54,8 @@ fun DialogConvertAlertDialog(
     uris: ArrayList<Uri>,
     /** Sum of source durations (all files); used for batch size/time estimates. */
     totalSourceDurationForEstimateMs: Long = 0L,
+    selectedCustomLocation: String = "",
+    onChangeCustomLocation: () -> Unit = {},
     onDismiss: () -> Unit,
     onCancel: () -> Unit,
     onStartConversion: (speed: String, uris: ArrayList<Uri>, bitrate: String, format: String, sampleRate: String) -> Unit = { _, _, _, _, _ -> },
@@ -109,6 +112,8 @@ fun DialogConvertAlertDialog(
                             proDialogFeature = featureName
                             showProDialog = true
                         },
+                        selectedCustomLocation = selectedCustomLocation,
+                        onChangeCustomLocation = onChangeCustomLocation,
                     )
                 }
 
@@ -157,6 +162,8 @@ fun DialogConvertContent(
     onSliderValueChanged: (Float) -> Unit,
     totalSourceDurationForEstimateMs: Long = 0L,
     onProFeatureClick: (String) -> Unit = {},
+    selectedCustomLocation: String = "",
+    onChangeCustomLocation: () -> Unit = {},
 ) {
     val allFormats = stringArrayResource(R.array.format_array).toList()
     val bitratesMp3 = stringArrayResource(R.array.bitrates_mp3).toList()
@@ -337,6 +344,12 @@ fun DialogConvertContent(
             }
         }
 
+        // Save Location Section
+        SaveLocationCard(
+            selectedCustomLocation = selectedCustomLocation,
+            onChangeCustomLocation = onChangeCustomLocation,
+        )
+
         // Conversion Estimate Card
         ConversionEstimateCard(estimate = conversionEstimate)
 
@@ -347,6 +360,86 @@ fun DialogConvertContent(
 
 
 
+
+@Composable
+private fun SaveLocationCard(
+    selectedCustomLocation: String,
+    onChangeCustomLocation: () -> Unit,
+) {
+    val displayName = remember(selectedCustomLocation) {
+        when {
+            selectedCustomLocation.isBlank() -> stringResource(R.string.label_save_location_default)
+            selectedCustomLocation.startsWith("content://") -> {
+                val uri = Uri.parse(selectedCustomLocation)
+                uri.lastPathSegment?.substringAfterLast(':')?.replace("%2F", "/") ?: stringResource(R.string.label_custom_folder)
+            }
+            selectedCustomLocation.startsWith("/") -> {
+                val name = java.io.File(selectedCustomLocation).name
+                name.takeIf { it.isNotBlank() } ?: stringResource(R.string.label_custom_folder)
+            }
+            else -> selectedCustomLocation
+        }
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onChangeCustomLocation() }
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Folder,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.label_save_location),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = displayName,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.primaryContainer,
+                onClick = onChangeCustomLocation,
+            ) {
+                Text(
+                    text = stringResource(R.string.label_change),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                )
+            }
+        }
+    }
+}
 
 @Composable
 private fun ProCompactLabel() {

@@ -278,6 +278,22 @@ fun HomeScreen(
         },
         uris = uriList,
         totalSourceDurationForEstimateMs = totalMediaDurationMs,
+        selectedCustomLocation = selectedCustomLocation,
+        onChangeCustomLocation = {
+            val displayLocation = when {
+                selectedCustomLocation.isBlank() -> "Default (Music/ConvertIt)"
+                selectedCustomLocation.startsWith("content://") -> {
+                    val parsed = Uri.parse(selectedCustomLocation)
+                    parsed.lastPathSegment?.substringAfterLast(':')?.replace("%2F", "/") ?: "Custom folder"
+                }
+                selectedCustomLocation.startsWith("/") -> {
+                    File(selectedCustomLocation).name.takeIf { it.isNotBlank() } ?: "ConvertIt"
+                }
+                else -> selectedCustomLocation
+            }
+            Toast.makeText(context, "Current: $displayLocation", Toast.LENGTH_LONG).show()
+            intentLauncher.openFolderPicker(folderPickLauncher)
+        },
         onStartConversion = { speed, uris, bitrate, format, sampleRate ->
             viewModel.startConversion(speed, uris, bitrate, format, sampleRate)
         },
@@ -296,6 +312,22 @@ fun HomeScreen(
         },
         uris = uriList,
         totalSourceDurationForEstimateMs = totalMediaDurationMs,
+        selectedCustomLocation = selectedCustomLocation,
+        onChangeCustomLocation = {
+            val displayLocation = when {
+                selectedCustomLocation.isBlank() -> "Default (Music/ConvertIt)"
+                selectedCustomLocation.startsWith("content://") -> {
+                    val parsed = Uri.parse(selectedCustomLocation)
+                    parsed.lastPathSegment?.substringAfterLast(':')?.replace("%2F", "/") ?: "Custom folder"
+                }
+                selectedCustomLocation.startsWith("/") -> {
+                    File(selectedCustomLocation).name.takeIf { it.isNotBlank() } ?: "ConvertIt"
+                }
+                else -> selectedCustomLocation
+            }
+            Toast.makeText(context, "Current: $displayLocation", Toast.LENGTH_LONG).show()
+            intentLauncher.openFolderPicker(folderPickLauncher)
+        },
         onStartConversion = { speed, uris, bitrate, format, sampleRate ->
             viewModel.startConversion(speed, uris, bitrate, format, sampleRate)
         },
