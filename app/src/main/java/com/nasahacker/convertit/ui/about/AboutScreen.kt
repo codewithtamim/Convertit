@@ -13,6 +13,7 @@ import android.content.Context
 import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -127,6 +128,8 @@ fun AboutScreen(onNavigateBack: (() -> Unit)? = null) {
                         .fillMaxWidth()
                         .padding(top = 16.dp)
                         .animateItem(),
+                    onDeveloperClick = { intentLauncher.openLink(AppConfig.GITHUB_PROFILE) },
+                    onModeratorClick = { intentLauncher.openLink(AppConfig.GITHUB_PROFILE_MOD) },
                 )
             }
 
@@ -258,6 +261,8 @@ private fun copyVersionToClipboard(context: Context, version: String) {
 @Composable
 private fun DeveloperSection(
     modifier: Modifier = Modifier,
+    onDeveloperClick: () -> Unit = {},
+    onModeratorClick: () -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -283,17 +288,18 @@ private fun DeveloperSection(
                 .padding(bottom = 4.dp),
         )
 
-        DeveloperRow(name = stringResource(R.string.label_dev))
-        DeveloperRow(name = stringResource(R.string.label_mod))
+        DeveloperRow(name = stringResource(R.string.label_dev), onClick = onDeveloperClick)
+        DeveloperRow(name = stringResource(R.string.label_mod), onClick = onModeratorClick)
     }
 }
 
 @Composable
-private fun DeveloperRow(name: String) {
+private fun DeveloperRow(name: String, onClick: () -> Unit = {}) {
     androidx.compose.material3.Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 4.dp)
+            .clickable(onClick = onClick),
         shape = MaterialTheme.shapes.large,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
     ) {
