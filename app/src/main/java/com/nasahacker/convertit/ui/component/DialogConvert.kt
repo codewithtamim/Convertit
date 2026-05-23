@@ -366,16 +366,17 @@ private fun SaveLocationCard(
     selectedCustomLocation: String,
     onChangeCustomLocation: () -> Unit,
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val displayName = remember(selectedCustomLocation) {
         when {
-            selectedCustomLocation.isBlank() -> stringResource(R.string.label_save_location_default)
+            selectedCustomLocation.isBlank() -> context.getString(R.string.label_save_location_default)
             selectedCustomLocation.startsWith("content://") -> {
                 val uri = Uri.parse(selectedCustomLocation)
-                uri.lastPathSegment?.substringAfterLast(':')?.replace("%2F", "/") ?: stringResource(R.string.label_custom_folder)
+                uri.lastPathSegment?.substringAfterLast(':')?.replace("%2F", "/") ?: context.getString(R.string.label_custom_folder)
             }
             selectedCustomLocation.startsWith("/") -> {
                 val name = java.io.File(selectedCustomLocation).name
-                name.takeIf { it.isNotBlank() } ?: stringResource(R.string.label_custom_folder)
+                name.takeIf { it.isNotBlank() } ?: context.getString(R.string.label_custom_folder)
             }
             else -> selectedCustomLocation
         }
