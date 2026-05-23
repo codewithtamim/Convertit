@@ -224,6 +224,11 @@
     <string name="pro_dialog_a11y_collapse_tools">Collapse Pro tools</string>
     <string name="pro_dialog_locked_feature_a11y">Locked Pro feature</string>
     
+    <!-- Save Location (Conversion Settings) -->
+    <string name="label_save_location">Save Location</string>
+    <string name="label_save_location_default">Default (Music/ConvertIt)</string>
+    <string name="label_custom_folder">Custom folder</string>
+
     <!-- Conversion Success Snackbar -->
     <string name="conversion_success_message">Conversion completed!</string>
     <string name="label_version_copied">Version %1$s copied</string>
