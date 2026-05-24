@@ -16,6 +16,7 @@ import com.nasahacker.convertit.domain.model.AudioFormat
 import com.nasahacker.convertit.domain.model.ConversionItem
 import com.nasahacker.convertit.domain.model.ConversionStatus
 import com.nasahacker.convertit.domain.model.Metadata
+import com.nasahacker.convertit.domain.repository.AppRepository
 import com.nasahacker.convertit.domain.repository.FileAccessRepository
 import com.nasahacker.convertit.domain.usecase.GetDontShowAgainUseCase
 import com.nasahacker.convertit.domain.usecase.GetSelectedCustomLocationUseCase
@@ -82,6 +83,7 @@ class HomeViewModel
         private val loadMetadata: LoadMetadataUseCase,
         private val saveMetadata: SaveMetadataUseCase,
         private val audioConverterRepository: AudioConverterRepository,
+        private val appRepository: AppRepository,
     ) : ViewModel() {
         
         companion object {
@@ -124,6 +126,34 @@ class HomeViewModel
         private val _convertingItems = MutableStateFlow<List<ConversionItem>>(emptyList())
         val convertingItems: StateFlow<List<ConversionItem>> = _convertingItems
 
+        val lastFormat: StateFlow<String> =
+            appRepository.lastFormat.stateIn(
+                viewModelScope,
+                SharingStarted.Lazily,
+                ".mp3",
+            )
+
+        val lastBitrate: StateFlow<String> =
+            appRepository.lastBitrate.stateIn(
+                viewModelScope,
+                SharingStarted.Lazily,
+                "256k",
+            )
+
+        val lastSampleRate: StateFlow<String> =
+            appRepository.lastSampleRate.stateIn(
+                viewModelScope,
+                SharingStarted.Lazily,
+                "44100",
+            )
+
+        val lastSpeed: StateFlow<String> =
+            appRepository.lastSpeed.stateIn(
+                viewModelScope,
+                SharingStarted.Lazily,
+                "1.0",
+            )
+
         /** Last successfully converted file URI for the snackbar action */
         private val _lastConvertedFileUri = MutableStateFlow<Uri?>(null)
         val lastConvertedFileUri: StateFlow<Uri?> = _lastConvertedFileUri
@@ -150,6 +180,20 @@ class HomeViewModel
             Log.d(TAG, "onSelectedCustomLocation called with: '$value'")
             viewModelScope.launch { 
                 saveSelectedCustomLocation(value)
+            }
+        }
+
+        fun onSaveLastConversionPreferences(
+            format: String,
+            bitrate: String,
+            sampleRate: String,
+            speed: String,
+        ) {
+            viewModelScope.launch {
+                appRepository.saveLastFormat(format)
+                appRepository.saveLastBitrate(bitrate)
+                appRepository.saveLastSampleRate(sampleRate)
+                appRepository.saveLastSpeed(speed)
             }
         }
 
@@ -457,6 +501,7 @@ class HomeViewModel
             format: String,
             sampleRate: String,
         ) {
+            onSaveLastConversionPreferences(format, bitrate, sampleRate, speed)
             viewModelScope.launch {
                 _isConversionInProgress.value = true
                 _conversionProgress.value = 0

@@ -23,6 +23,14 @@ class AppRepositoryImpl
             get() = dataSource.isDontShowAgain
         override val selectedCustomLocation: Flow<String>
             get() = dataSource.selectedCustomSaveLocation
+        override val lastFormat: Flow<String>
+            get() = dataSource.lastFormat
+        override val lastBitrate: Flow<String>
+            get() = dataSource.lastBitrate
+        override val lastSampleRate: Flow<String>
+            get() = dataSource.lastSampleRate
+        override val lastSpeed: Flow<String>
+            get() = dataSource.lastSpeed
 
         override suspend fun saveIsDontShowAgain(value: Boolean) {
             dataSource.saveIsDontShowAgain(value)
@@ -30,5 +38,21 @@ class AppRepositoryImpl
 
         override suspend fun saveSelectedCustomLocation(value: String) {
             dataSource.saveSelectedCustomSaveLocation(value)
+        }
+
+        override suspend fun saveLastFormat(value: String) {
+            dataSource.saveLastFormat(value)
+        }
+
+        override suspend fun saveLastBitrate(value: String) {
+            dataSource.saveLastBitrate(value)
+        }
+
+        override suspend fun saveLastSampleRate(value: String) {
+            dataSource.saveLastSampleRate(value)
+        }
+
+        override suspend fun saveLastSpeed(value: String) {
+            dataSource.saveLastSpeed(value)
         }
     }
