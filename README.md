@@ -12,6 +12,8 @@ ConvertIt is distributed on the Google Play Store and GitHub Releases.
 * [Certificate Fingerprints](#certificate-fingerprints)
 * [Contributing](#contributing)
 * [License](#license)
+* [Trademark](#trademark)
+* [Disclaimer](#disclaimer)
 
 <a name="features"></a>
 ## Features
@@ -96,3 +98,13 @@ If you are interested in contributing to ConvertIt, please read our [Contributin
 ## License
 
 This project is licensed under the GNU General Public License v3 (GPLv3). See the [LICENSE](LICENSE) file for details.
+
+<a name="trademark"></a>
+## Trademark
+
+"Convertit" is a trademark of THE BYTE ARRAY LTD.
+
+<a name="disclaimer"></a>
+## Disclaimer
+
+This software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.
