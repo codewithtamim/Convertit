@@ -46,14 +46,15 @@ class AudioConverterRepositoryImpl
         val TAG = "Audio"
 
         private val cancelledUris = Collections.synchronizedSet(mutableSetOf<String>())
+        @Volatile
+        private var activeSessionId: Long = 0L
+        private var sessionCounter: Long = 0L
+        @Volatile
         private var activeFfmpegSession: com.arthenica.ffmpegkit.FFmpegSession? = null
-        private var activeConvertingUri: String? = null
 
         override fun cancelFileConversion(uriString: String) {
             cancelledUris.add(uriString)
-            if (uriString == activeConvertingUri) {
-                activeFfmpegSession?.cancel()
-            }
+            activeFfmpegSession?.cancel()
         }
 
         override suspend fun getMediaDuration(uri: Uri): Long =
@@ -256,23 +257,30 @@ class AudioConverterRepositoryImpl
                         
                         val coverArtPathFinal = coverArtPath
 
-                        activeConvertingUri = uriString
-                        activeFfmpegSession?.cancel()
+                        val currentSessionId = ++sessionCounter
+                        activeSessionId = currentSessionId
                         activeFfmpegSession = null
 
-                        FFmpegKit.executeWithArgumentsAsync(
-                            ffmpegArgs,
-                            { session ->
-                                activeConvertingUri = null
-                                activeFfmpegSession = null
-                                tempFile.delete()
-                                coverArtPathFinal?.let { File(it).delete() }
+                        if (cancelledUris.contains(uriString)) {
+                            onFileComplete(currentUri, false)
+                            cancelledUris.remove(uriString)
+                            continue
+                        }
 
-                                if (cancelledUris.contains(uriString)) {
-                                    onFileComplete(currentUri, false)
-                                    sessionCompleted.complete(false)
-                                    return@executeWithArgumentsAsync
-                                }
+                        val ffmpegSession =
+                            FFmpegKit.executeWithArgumentsAsync(
+                                ffmpegArgs,
+                                { session ->
+                                    val isStale = currentSessionId != activeSessionId
+
+                                    tempFile.delete()
+                                    coverArtPathFinal?.let { File(it).delete() }
+
+                                    if (isStale || cancelledUris.contains(uriString)) {
+                                        onFileComplete(currentUri, false)
+                                        sessionCompleted.complete(false)
+                                        return@executeWithArgumentsAsync
+                                    }
 
                                 if (ReturnCode.isSuccess(session.returnCode)) {
                                     val recordedOutput =
@@ -333,6 +341,7 @@ class AudioConverterRepositoryImpl
                                 }
                             },
                         )
+                        activeFfmpegSession = ffmpegSession
                         
                         val success = sessionCompleted.await()
                         if (!success) {
