@@ -33,6 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import java.util.Collections
 import javax.inject.Inject
 import kotlin.io.inputStream
 
@@ -44,7 +45,7 @@ class AudioConverterRepositoryImpl
     ) : AudioConverterRepository {
         val TAG = "Audio"
 
-        private val cancelledUris = mutableSetOf<String>()
+        private val cancelledUris = Collections.synchronizedSet(mutableSetOf<String>())
         private var activeFfmpegSession: com.arthenica.ffmpegkit.FFmpegSession? = null
         private var activeConvertingUri: String? = null
 

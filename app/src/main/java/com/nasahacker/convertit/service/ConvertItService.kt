@@ -152,8 +152,6 @@ class ConvertItService : Service() {
             if (cancelUri != null) {
                 Log.i(TAG, "Cancelling file: $cancelUri")
                 audioConverterRepository.cancelFileConversion(cancelUri)
-                val cancelledFileUri = Uri.parse(cancelUri)
-                broadcastFileComplete(cancelledFileUri, false)
             }
             return START_NOT_STICKY
         }

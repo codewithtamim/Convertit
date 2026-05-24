@@ -26,6 +26,7 @@
     <string name="label_view_metadata">মেটাডেটা দেখুন</string>
     <string name="label_version">ভার্সন: %1$s</string>
     <string name="label_cancel">বাতিল করুন</string>
+    <string name="label_cancel_conversion">রূপান্তর বাতিল করুন</string>
     <string name="label_successfully_converted">রূপান্তর সফলভাবে সম্পন্ন হয়েছে</string>
     <string name="label_failed_to_convert">রূপান্তর ব্যর্থ হয়েছে</string>
     <string name="label_conversion_started_with_bitrate_and_format_please_wait">%1$s বিটরেট এবং %2$s ফরম্যাট দিয়ে রূপান্তর শুরু হচ্ছে। অনুগ্রহ করে অপেক্ষা করুন।</string>
