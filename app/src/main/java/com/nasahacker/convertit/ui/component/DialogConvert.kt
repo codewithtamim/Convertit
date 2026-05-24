@@ -59,11 +59,15 @@ fun DialogConvertAlertDialog(
     onDismiss: () -> Unit,
     onCancel: () -> Unit,
     onStartConversion: (speed: String, uris: ArrayList<Uri>, bitrate: String, format: String, sampleRate: String) -> Unit = { _, _, _, _, _ -> },
+    initialFormat: String = ".mp3",
+    initialBitrate: String = "256k",
+    initialSampleRate: String = "44100",
+    initialSpeed: Float = 1.0f,
 ) {
-    var selectedFormat by remember(showDialog) { mutableStateOf(".mp3") }
-    var selectedBitrate by remember(showDialog) { mutableStateOf("256k") }
-    var selectedSampleRate by remember(showDialog) { mutableStateOf("44100") }
-    var sliderValue by remember(showDialog) { mutableFloatStateOf(1.0f) }
+    var selectedFormat by remember(showDialog) { mutableStateOf(initialFormat) }
+    var selectedBitrate by remember(showDialog) { mutableStateOf(initialBitrate) }
+    var selectedSampleRate by remember(showDialog) { mutableStateOf(initialSampleRate) }
+    var sliderValue by remember(showDialog) { mutableFloatStateOf(initialSpeed) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     
     // Pro upgrade dialog state

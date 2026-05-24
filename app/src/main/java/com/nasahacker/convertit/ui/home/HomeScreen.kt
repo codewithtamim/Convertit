@@ -60,6 +60,10 @@ fun HomeScreen(
     val selectedCustomLocation by viewModel.selectedCustomLocation.collectAsStateWithLifecycle()
     val convertingItems by viewModel.convertingItems.collectAsStateWithLifecycle()
     val lastConvertedFileUri by viewModel.lastConvertedFileUri.collectAsStateWithLifecycle()
+    val lastFormat by viewModel.lastFormat.collectAsStateWithLifecycle()
+    val lastBitrate by viewModel.lastBitrate.collectAsStateWithLifecycle()
+    val lastSampleRate by viewModel.lastSampleRate.collectAsStateWithLifecycle()
+    val lastSpeed by viewModel.lastSpeed.collectAsStateWithLifecycle()
     var showDialog by rememberSaveable { mutableStateOf(false) }
     var showVideoDialog by rememberSaveable { mutableStateOf(false) }
     var showMetadataDialog by rememberSaveable { mutableStateOf(false) }
@@ -297,6 +301,10 @@ fun HomeScreen(
         onStartConversion = { speed, uris, bitrate, format, sampleRate ->
             viewModel.startConversion(speed, uris, bitrate, format, sampleRate)
         },
+        initialFormat = lastFormat,
+        initialBitrate = lastBitrate,
+        initialSampleRate = lastSampleRate,
+        initialSpeed = lastSpeed.toFloatOrNull() ?: 1.0f,
     )
     
     // Video Conversion Dialog
@@ -331,6 +339,10 @@ fun HomeScreen(
         onStartConversion = { speed, uris, bitrate, format, sampleRate ->
             viewModel.startConversion(speed, uris, bitrate, format, sampleRate)
         },
+        initialFormat = lastFormat,
+        initialBitrate = lastBitrate,
+        initialSampleRate = lastSampleRate,
+        initialSpeed = lastSpeed.toFloatOrNull() ?: 1.0f,
     )
 
     DialogEditMetadata(

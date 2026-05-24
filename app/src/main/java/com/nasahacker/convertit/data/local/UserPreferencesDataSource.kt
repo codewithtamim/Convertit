@@ -20,6 +20,10 @@ class UserPreferencesDataSource
         private object Keys {
             val PREF_DONT_SHOW_AGAIN = booleanPreferencesKey("pref_dont_show_again")
             val PREF_CUSTOM_SAVE_LOCATION = stringPreferencesKey("pref_custom_save_location")
+            val PREF_LAST_FORMAT = stringPreferencesKey("pref_last_format")
+            val PREF_LAST_BITRATE = stringPreferencesKey("pref_last_bitrate")
+            val PREF_LAST_SAMPLE_RATE = stringPreferencesKey("pref_last_sample_rate")
+            val PREF_LAST_SPEED = stringPreferencesKey("pref_last_speed")
         }
 
         val isDontShowAgain: Flow<Boolean> =
@@ -37,6 +41,26 @@ class UserPreferencesDataSource
                 savedValue ?: defaultValue
             }
 
+        val lastFormat: Flow<String> =
+            dataStore.data.map { prefs ->
+                prefs[Keys.PREF_LAST_FORMAT] ?: ".mp3"
+            }
+
+        val lastBitrate: Flow<String> =
+            dataStore.data.map { prefs ->
+                prefs[Keys.PREF_LAST_BITRATE] ?: "256k"
+            }
+
+        val lastSampleRate: Flow<String> =
+            dataStore.data.map { prefs ->
+                prefs[Keys.PREF_LAST_SAMPLE_RATE] ?: "44100"
+            }
+
+        val lastSpeed: Flow<String> =
+            dataStore.data.map { prefs ->
+                prefs[Keys.PREF_LAST_SPEED] ?: "1.0"
+            }
+
         suspend fun saveIsDontShowAgain(value: Boolean) {
             dataStore.edit { prefs ->
                 prefs[Keys.PREF_DONT_SHOW_AGAIN] = value
@@ -46,6 +70,30 @@ class UserPreferencesDataSource
         suspend fun saveSelectedCustomSaveLocation(value: String) {
             dataStore.edit { prefs ->
                 prefs[Keys.PREF_CUSTOM_SAVE_LOCATION] = value
+            }
+        }
+
+        suspend fun saveLastFormat(value: String) {
+            dataStore.edit { prefs ->
+                prefs[Keys.PREF_LAST_FORMAT] = value
+            }
+        }
+
+        suspend fun saveLastBitrate(value: String) {
+            dataStore.edit { prefs ->
+                prefs[Keys.PREF_LAST_BITRATE] = value
+            }
+        }
+
+        suspend fun saveLastSampleRate(value: String) {
+            dataStore.edit { prefs ->
+                prefs[Keys.PREF_LAST_SAMPLE_RATE] = value
+            }
+        }
+
+        suspend fun saveLastSpeed(value: String) {
+            dataStore.edit { prefs ->
+                prefs[Keys.PREF_LAST_SPEED] = value
             }
         }
     }
