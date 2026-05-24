@@ -1,8 +1,8 @@
-# ConvertIt - Audio and Video Converter
+# ConvertIt® - Audio and Video Converter
 
-ConvertIt is an ad-free audio and video converter and metadata editor app built using Kotlin and Jetpack Compose, powered by FFmpeg and TagLib.
+ConvertIt® is an ad-free audio and video converter and metadata editor app built using Kotlin and Jetpack Compose, powered by FFmpeg and TagLib.
 
-ConvertIt is distributed on the Google Play Store and GitHub Releases.
+ConvertIt® is distributed on the Google Play Store and GitHub Releases.
 
 ## Table of Contents
 
@@ -12,11 +12,13 @@ ConvertIt is distributed on the Google Play Store and GitHub Releases.
 * [Certificate Fingerprints](#certificate-fingerprints)
 * [Contributing](#contributing)
 * [License](#license)
+* [Trademark](#trademark)
+* [Disclaimer](#disclaimer)
 
 <a name="features"></a>
 ## Features
 
-ConvertIt supports a wide range of audio and video formats and provides the following features:
+ConvertIt® supports a wide range of audio and video formats and provides the following features:
 
 * Multiple formats: FLAC, MP3, WAV, AAC, OGG, M4A, AIFF, OPUS, WMA, MKA, SPX, AMRWB, and more
 * Bitrate options: 9k, 16k, 24k, 32k, 48k, 64k, 96k, 128k, 192k, 256k, 320k, 512k, 768k, and 1024k
@@ -28,15 +30,15 @@ ConvertIt supports a wide range of audio and video formats and provides the foll
 ## Screenshots
 
 <p align="center">
-  <img src="art/img.png" alt="ConvertIt Home" width="220"/>
-  <img src="art/img_1.png" alt="ConvertIt Conversion" width="220"/>
-  <img src="art/img_2.png" alt="ConvertIt Library" width="220"/>
+  <img src="art/img.png" alt="ConvertIt® Home" width="220"/>
+  <img src="art/img_1.png" alt="ConvertIt® Conversion" width="220"/>
+  <img src="art/img_2.png" alt="ConvertIt® Library" width="220"/>
 </p>
 
 <a name="download"></a>
 ## Download
 
-Download ConvertIt from the following sources:
+Download ConvertIt® from the following sources:
 
 <p align="left">
   <a href="https://play.google.com/store/apps/details?id=com.nasahacker.convertit" target="_blank">
@@ -85,14 +87,24 @@ SHA-256 Fingerprint:
 2. Compare the obtained fingerprints with the ones listed above
 3. Check if they match exactly
 
-This confirms that you have the legitimate APK of ConvertIt.
+This confirms that you have the legitimate APK of ConvertIt®.
 
 <a name="contributing"></a>
 ## Contributing
 
-If you are interested in contributing to ConvertIt, please read our [Contributing Guidelines](CONTRIBUTING.md).
+If you are interested in contributing to ConvertIt®, please read our [Contributing Guidelines](CONTRIBUTING.md).
 
 <a name="license"></a>
 ## License
 
 This project is licensed under the GNU General Public License v3 (GPLv3). See the [LICENSE](LICENSE) file for details.
+
+<a name="trademark"></a>
+## Trademark
+
+"Convertit®" is a trademark of THE BYTE ARRAY LTD.
+
+<a name="disclaimer"></a>
+## Disclaimer
+
+This software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.
