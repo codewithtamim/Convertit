@@ -47,6 +47,8 @@ object AppConfig {
     const val CONVERT_STATE_ACTION = "com.nasahacker.convertit.ACTION_CONVERSION_STATE"
     const val ACTION_STOP_SERVICE = "com.nasahacker.convertit.ACTION_STOP_SERVICE"
     const val ACTION_REQUEST_STATE = "com.nasahacker.convertit.ACTION_REQUEST_STATE"
+    const val ACTION_CANCEL_FILE = "com.nasahacker.convertit.ACTION_CANCEL_FILE"
+    const val CANCEL_FILE_URI = "cancel_file_uri"
     
     // Broadcast extras
     const val IS_SUCCESS = "isSuccess"

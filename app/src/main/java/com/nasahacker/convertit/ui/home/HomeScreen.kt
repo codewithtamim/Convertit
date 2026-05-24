@@ -192,7 +192,8 @@ fun HomeScreen(
             ) { item ->
                 ConvertingItem(
                     item = item,
-                    isVisible = item.status != ConversionStatus.COMPLETED && item.status != ConversionStatus.FAILED
+                    isVisible = item.status != ConversionStatus.COMPLETED && item.status != ConversionStatus.FAILED && item.status != ConversionStatus.CANCELLED,
+                    onCancel = { viewModel.cancelFile(item.uri) }
                 )
             }
             

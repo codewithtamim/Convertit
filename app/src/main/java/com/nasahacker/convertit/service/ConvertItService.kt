@@ -46,8 +46,10 @@ import com.nasahacker.convertit.domain.model.AudioFormat
 import com.nasahacker.convertit.domain.model.AudioSampleRate
 import com.nasahacker.convertit.domain.repository.AppRepository
 import com.nasahacker.convertit.domain.repository.AudioConverterRepository
+import com.nasahacker.convertit.util.AppConfig.ACTION_CANCEL_FILE
 import com.nasahacker.convertit.util.AppConfig.ACTION_REQUEST_STATE
 import com.nasahacker.convertit.util.AppConfig.ACTION_STOP_SERVICE
+import com.nasahacker.convertit.util.AppConfig.CANCEL_FILE_URI
 import com.nasahacker.convertit.util.AppConfig.AUDIO_FORMAT
 import com.nasahacker.convertit.util.AppConfig.AUDIO_PLAYBACK_SPEED
 import com.nasahacker.convertit.util.AppConfig.BITRATE
@@ -145,6 +147,17 @@ class ConvertItService : Service() {
             return START_NOT_STICKY
         }
 
+        if (intent?.action == ACTION_CANCEL_FILE) {
+            val cancelUri = intent.getStringExtra(CANCEL_FILE_URI)
+            if (cancelUri != null) {
+                Log.i(TAG, "Cancelling file: $cancelUri")
+                audioConverterRepository.cancelFileConversion(cancelUri)
+                val cancelledFileUri = Uri.parse(cancelUri)
+                broadcastFileComplete(cancelledFileUri, false)
+            }
+            return START_NOT_STICKY
+        }
+
         val uriList: ArrayList<Uri>? =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 intent?.getParcelableArrayListExtra(URI_LIST, Uri::class.java)
@@ -185,9 +198,9 @@ class ConvertItService : Service() {
             return START_NOT_STICKY
         }
 
-        pendingUris = uriList.toList()
-        currentTargetFormat = format.extension
-        currentFileIndex = 0
+            pendingUris = uriList.toList()
+            currentTargetFormat = format.extension
+            currentFileIndex = 0
         
         conversionJob?.cancel()
         conversionJob = null

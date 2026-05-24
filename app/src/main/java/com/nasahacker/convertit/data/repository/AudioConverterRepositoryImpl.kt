@@ -44,6 +44,17 @@ class AudioConverterRepositoryImpl
     ) : AudioConverterRepository {
         val TAG = "Audio"
 
+        private val cancelledUris = mutableSetOf<String>()
+        private var activeFfmpegSession: com.arthenica.ffmpegkit.FFmpegSession? = null
+        private var activeConvertingUri: String? = null
+
+        override fun cancelFileConversion(uriString: String) {
+            cancelledUris.add(uriString)
+            if (uriString == activeConvertingUri) {
+                activeFfmpegSession?.cancel()
+            }
+        }
+
         override suspend fun getMediaDuration(uri: Uri): Long =
             withContext(Dispatchers.IO) {
                 // Fast path: MediaMetadataRetriever reads metadata directly from
@@ -182,6 +193,15 @@ class AudioConverterRepositoryImpl
 
             for ((index, uri) in uris.withIndex()) {
                 currentFileIndex = index
+                
+                val uriString = uri.toString()
+                if (cancelledUris.contains(uriString)) {
+                    Log.i(TAG, "Skipping cancelled file: ${uri.lastPathSegment}")
+                    onFileStart(uri, index, totalFiles)
+                    onFileComplete(uri, false)
+                    continue
+                }
+                
                 onFileStart(uri, index, totalFiles)
                 
                 val inputFileName = getFileName(context.contentResolver, uri)
@@ -235,11 +255,23 @@ class AudioConverterRepositoryImpl
                         
                         val coverArtPathFinal = coverArtPath
 
+                        activeConvertingUri = uriString
+                        activeFfmpegSession?.cancel()
+                        activeFfmpegSession = null
+
                         FFmpegKit.executeWithArgumentsAsync(
                             ffmpegArgs,
                             { session ->
+                                activeConvertingUri = null
+                                activeFfmpegSession = null
                                 tempFile.delete()
                                 coverArtPathFinal?.let { File(it).delete() }
+
+                                if (cancelledUris.contains(uriString)) {
+                                    onFileComplete(currentUri, false)
+                                    sessionCompleted.complete(false)
+                                    return@executeWithArgumentsAsync
+                                }
 
                                 if (ReturnCode.isSuccess(session.returnCode)) {
                                     val recordedOutput =
@@ -303,10 +335,18 @@ class AudioConverterRepositoryImpl
                         
                         val success = sessionCompleted.await()
                         if (!success) {
+                            if (cancelledUris.contains(uriString)) {
+                                cancelledUris.remove(uriString)
+                                continue
+                            }
                             return
                         }
                     } ?: throw Exception("Failed to open input stream")
                 } catch (e: Exception) {
+                    if (cancelledUris.contains(uriString)) {
+                        cancelledUris.remove(uriString)
+                        continue
+                    }
                     onFileComplete(uri, false)
                     onFailure(
                         context.getString(

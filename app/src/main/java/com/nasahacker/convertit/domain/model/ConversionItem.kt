@@ -19,5 +19,6 @@ enum class ConversionStatus {
     PENDING,
     CONVERTING,
     COMPLETED,
-    FAILED
+    FAILED,
+    CANCELLED
 }

@@ -278,6 +278,9 @@ class HomeViewModel
                             .takeIf { it >= 0 } ?: currentItems.indexOfFirst { it.status == ConversionStatus.CONVERTING }
                             .takeIf { it >= 0 } ?: 0
                         
+                        val targetItem = currentItems.getOrNull(completedIndex) ?: return@launch
+                        if (targetItem.status == ConversionStatus.CANCELLED) return@launch
+                        
                         // Mark item as completed to trigger exit animation
                         val updatedItems = currentItems.mapIndexed { index, item ->
                             if (index == completedIndex) {
@@ -470,6 +473,25 @@ class HomeViewModel
                 }
                 _totalMediaDurationMs.value = sum
                 Log.d(TAG, "Loaded total media duration for estimate: $sum ms (${uris.size} files)")
+            }
+        }
+
+        fun cancelFile(uri: Uri) {
+            val intent = Intent(application, ConvertItService::class.java).apply {
+                action = AppConfig.ACTION_CANCEL_FILE
+                putExtra(AppConfig.CANCEL_FILE_URI, uri.toString())
+            }
+            application.startService(intent)
+            _convertingItems.value = _convertingItems.value.map { item ->
+                if (item.uri == uri) {
+                    item.copy(status = ConversionStatus.CANCELLED, progress = 0f)
+                } else {
+                    item
+                }
+            }
+            viewModelScope.launch {
+                delay(AppConfig.ANIMATION_DURATION_MS)
+                _convertingItems.value = _convertingItems.value.filter { it.uri != uri }
             }
         }
 

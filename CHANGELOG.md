@@ -2,6 +2,7 @@
 
 ## [1.3.14-lts] - Current
 
+- Add per-file cancellation during batch conversion
 - Add output location option to conversion settings bottom sheet
 - Add clickable GitHub profile links for developer and moderator on About page
 - Add GitHub repo link to About page

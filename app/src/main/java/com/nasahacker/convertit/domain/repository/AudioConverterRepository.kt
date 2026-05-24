@@ -75,6 +75,8 @@ interface AudioConverterRepository {
         onProgress: (Int) -> Unit,
     )
 
+    fun cancelFileConversion(uriString: String)
+
     suspend fun convertWithManualCue(
         customSaveUri: Uri?,
         playbackSpeed: String,
