@@ -157,17 +157,24 @@ fun HomeScreen(
 
     LaunchedEffect(conversionStatus) {
         conversionStatus?.let { isSuccess ->
-            if (isSuccess) {
-                viewModel.clearUriList()
-                viewModel.resetConversionStatus()
-                showReviewDialog = true
+            viewModel.clearUriList()
+            viewModel.resetConversionStatus()
 
-                scope.launch {
-                    snackbarHostState.showSnackbar(
-                        message = context.getString(R.string.conversion_success_message),
-                        duration = androidx.compose.material3.SnackbarDuration.Short,
-                    )
-                }
+            if (isSuccess) {
+                showReviewDialog = true
+            }
+
+            scope.launch {
+                val message =
+                    if (isSuccess) {
+                        context.getString(R.string.conversion_success_message)
+                    } else {
+                        context.getString(R.string.conversion_cancelled_message)
+                    }
+                snackbarHostState.showSnackbar(
+                    message = message,
+                    duration = androidx.compose.material3.SnackbarDuration.Short,
+                )
             }
         }
     }

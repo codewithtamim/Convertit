@@ -230,8 +230,9 @@
     <string name="label_save_location_default">Default (Music/ConvertIt)</string>
     <string name="label_custom_folder">Custom folder</string>
 
-    <!-- Conversion Success Snackbar -->
+    <!-- Conversion Snackbar Messages -->
     <string name="conversion_success_message">Conversion completed!</string>
+    <string name="conversion_cancelled_message">Conversion cancelled</string>
     <string name="label_version_copied">Version %1$s copied</string>
     <string name="label_view_file">View File</string>
     

@@ -54,6 +54,8 @@
     <string name="conversion_success">রূপান্তর সফল হয়েছে</string>
     <string name="conversion_failed">রূপান্তর ব্যর্থ হয়েছে</string>
     <string name="conversion_cancelled">রূপান্তর বাতিল হয়েছে</string>
+    <string name="conversion_success_message">রূপান্তর সম্পন্ন হয়েছে!</string>
+    <string name="conversion_cancelled_message">রূপান্তর বাতিল করা হয়েছে</string>
     <string name="conversion_status">রূপান্তরের অবস্থা</string>
     <string name="label_failed_to_copy_file_from_uri">সোর্স থেকে ফাইল অনুলিপি করতে ব্যর্থ</string>
 

@@ -110,6 +110,8 @@ class HomeViewModel
         private val _conversionProgress = MutableStateFlow(0)
         val conversionProgress: StateFlow<Int> = _conversionProgress
 
+        private var hasCancelledFiles = false
+
         /**
          * Sum of source durations for all URIs in the conversion dialog (batch estimate).
          *
@@ -205,13 +207,11 @@ class HomeViewModel
                 ) {
                     val isSuccess = intent?.getBooleanExtra(AppConfig.IS_SUCCESS, false) == true
                     viewModelScope.launch {
-                        _conversionStatus.value = isSuccess
+                        val wasCancelled = hasCancelledFiles
+                        hasCancelledFiles = false
+                        _conversionStatus.value = if (wasCancelled) false else isSuccess
                         _isConversionInProgress.value = false
-                        if (isSuccess) {
-                            _conversionProgress.value = 100
-                        } else {
-                            _conversionProgress.value = 0
-                        }
+                        _conversionProgress.value = 0
                         _convertingItems.value = emptyList()
                         clearUriList()
                     }
@@ -477,6 +477,7 @@ class HomeViewModel
         }
 
         fun cancelFile(uri: Uri) {
+            hasCancelledFiles = true
             val intent = Intent(application, ConvertItService::class.java).apply {
                 action = AppConfig.ACTION_CANCEL_FILE
                 putExtra(AppConfig.CANCEL_FILE_URI, uri.toString())
